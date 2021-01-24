@@ -1,0 +1,135 @@
+open "USERS" to F.USERS else
+   gosub error
+end
+open "SYSCONFIGS" to F.SYSCONFIGS else
+   gosub error
+end
+
+CALL WGETPARAM(userId, 1)
+CALL WGETPARAM(queryType, 2)
+IF userId = "" then
+   selectAllFlag = @TRUE
+end else
+   selectAllFlag = @FALSE
+end
+*
+call WGETBODY(requestBodyJSON)
+* I have no idea why I need to do this. Somewhere junk is being added to requests and this isn't dealing
+requestBodyJSON = requestBodyJSON[1,index(requestBodyJSON,"}",count(requestBodyJSON,"}"))]
+requestBodyJSON = requestBodyJSON[index(requestBodyJSON,"{",1),len(requestBodyJSON)]
+*
+logmsg "USERS/":userId:" with ":requestBodyJSON:"|"
+*
+begin case
+   case userId # "" and queryType = "DELETE"
+      gosub handle.delete
+   case userId # "" and requestBodyJSON # ""
+      gosub handle.post
+   case userId # ""
+      gosub handle.get
+   case 1
+      gosub handle.get.all
+end case
+*
+*******
+send.response:
+call WSEND(response)
+RETURN
+***********
+handle.get.all:
+*
+query = \SSELECT USERS\
+
+if not(selectAllFlag) then
+   query := \ with @ID = \:userId
+end
+
+LOGMSG query
+*
+EXECUTE query CAPTURING MESSAGE RTNLIST USER.IDS
+*
+response = ""
+userListPtr = 0
+*
+USER.CNT = DCOUNT(USER.IDS,@AM)
+for USER.PTR = 1 TO USER.CNT
+   user.id = USER.IDS<USER.PTR>
+   user = OBJECT("USER", user.id)
+   if user->GET.EXISTS() then
+      userListPtr += 1
+      response<userListPtr> = user->TO.JSON()
+   end
+next USER.PTR
+response = "[":ereplace(response,@AM,","):"]"
+*
+RETURN
+***********
+handle.get:
+user = OBJECT("USER", userId)
+if user->GET.EXISTS() then
+   response = user->TO.JSON()
+   call WSETSTATUS(200)
+end else
+   response{'status'} = "ERROR"
+   call WSETSTATUS(404)
+end
+
+RETURN
+***********
+handle.post:
+*
+request = JPARSE(requestBodyJSON)
+*
+user = OBJECT("USER", userId)
+if user->GET.EXISTS() then
+   if ELEMENT.EXISTS(request{"firstName"}) then
+      user->SET.FIRSTNAME(request{'firstName'})
+   end
+   if ELEMENT.EXISTS(request{"lastName"}) then
+      user->SET.LASTNAME(request{'lastName'})
+   end
+   if ELEMENT.EXISTS(request{"password"}) then
+      readv pepper from F.SYSCONFIGS, "pepper", 1 else gosub error
+      user->SET.PASSWORD(DIGEST(userName:password:pepper, @FALSE, "SHA512"))
+   end
+   if ELEMENT.EXISTS(request{"emailAddress"}) then
+      user->SET.EMAIL(request{"emailAddress"})
+   end
+
+   status = user->SAVE.OBJECT()
+   response = user->TO.JSON()
+   call WSETSTATUS(200)
+end else
+   response{'status'} = "ERROR"
+   call WSETSTATUS(404)
+   response = JBUILD(response)
+end
+*
+
+*
+RETURN
+***********
+handle.delete:
+
+user = OBJECT("USER", userId)
+if user->GET.EXISTS() then
+   user->DELETE.OBJECT(status)
+   response{'status'} = "OK"
+   call WSETSTATUS(200)
+end else
+   response{'status'} = "ERROR"
+   call WSETSTATUS(404)
+end
+response = JBUILD(response)
+
+RETURN
+***********
+
+error:
+LOGMSG "AUTH ERROR"
+response{'status'} = "ERROR"
+response{'value'} = "false"
+call WSETSTATUS(500)
+goto send.response
+return
+end
