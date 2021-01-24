@@ -18,7 +18,7 @@ call WGETBODY(requestBodyJSON)
 requestBodyJSON = requestBodyJSON[1,index(requestBodyJSON,"}",count(requestBodyJSON,"}"))]
 requestBodyJSON = requestBodyJSON[index(requestBodyJSON,"{",1),len(requestBodyJSON)]
 *
-logmsg "USERS/":userId:" with ":requestBodyJSON:"|"
+logmsg queryType:" USERS/":userId:" with ":requestBodyJSON:"|"
 *
 begin case
    case userId # "" and queryType = "DELETE"
