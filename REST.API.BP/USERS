@@ -5,6 +5,26 @@ open "SYSCONFIGS" to F.SYSCONFIGS else
    gosub error
 end
 
+CALL WSETCONTENTTYPE("application/json")
+*
+CALL WSETHEADER("Access-Control-Allow-Origin","*")
+*
+* Get our request_method
+*
+CALL WGETHEADER(REQUEST.METHOD,"REQUEST_METHOD")
+*
+* Special code for CORS.  If cors kicks and a OPTION request is sent by the browser the
+* following code will make this work.  This is a development only item.  For production
+* you want to read the CORS documents.
+*
+IF REQUEST.METHOD = "OPTIONS" THEN
+   CALL WSETHEADER("Access-Control-Headers"        ,"Content-Type, Authentication"            )
+   CALL WSETHEADER("Access-Control-Allow-Headers"  ,"Content-Type, Authentication, Cookies"   )
+   CALL WSETHEADER("Access-Control-Allow-Methods"  ,"GET,POST,DELETE"                         )
+   CALL WSEND("")
+   STOP
+END
+
 CALL WGETPARAM(userId, 1)
 CALL WGETPARAM(queryType, 2)
 IF userId = "" then
@@ -18,17 +38,17 @@ call WGETBODY(requestBodyJSON)
 requestBodyJSON = requestBodyJSON[1,index(requestBodyJSON,"}",count(requestBodyJSON,"}"))]
 requestBodyJSON = requestBodyJSON[index(requestBodyJSON,"{",1),len(requestBodyJSON)]
 *
-logmsg queryType:" USERS/":userId:" with ":requestBodyJSON:"|"
+logmsg REQUEST.METHOD:" USERS/":userId:" with ":requestBodyJSON:"|"
 *
 begin case
-   case userId # "" and queryType = "DELETE"
+   case userId # "" and REQUEST.METHOD = "DELETE"
       gosub handle.delete
-   case userId # "" and requestBodyJSON # ""
+   case REQUEST.METHOD = "POST"
       gosub handle.post
-   case userId # ""
+   case REQUEST.METHOD = "GET" and userId # ""
       gosub handle.get
-   case 1
-      gosub handle.get.all
+   case REQUEST.METHOD = "GET" and userId = ""
+      gosub handle.get.list
 end case
 *
 *******
@@ -36,7 +56,7 @@ send.response:
 call WSEND(response)
 RETURN
 ***********
-handle.get.all:
+handle.get.list:
 *
 query = \SSELECT USERS\
 
