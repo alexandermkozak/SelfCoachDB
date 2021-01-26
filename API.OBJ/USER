@@ -37,6 +37,7 @@ CLASS USER
       ** Before writing, we should check "version" to be sure we aren't writing an older version on top of a newer version
       write userRec on F.USERS, userName ON ERROR
          status = @FALSE
+         logmsg \Error writing to users for \:userName:\ status: \:STATUS()
       end
       exists = (exists or status) ;* If it already existed before, don't set to false
       return status ;* Indicate we succeeded/failed to save

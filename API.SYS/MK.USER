@@ -28,6 +28,7 @@ status = @FALSE
 ***
 *** Proposed new version
 user = OBJECT("USER", userName)
+userName = user->GET.USERNAME()
 if user->GET.EXISTS() then
    msg = "User Exists!"
 end else
