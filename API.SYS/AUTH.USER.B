@@ -1,4 +1,4 @@
-subroutine AUTH.USER(userName, password, result, userInfo)
+subroutine AUTH.USER.B(userName, password, result, userInfo)
 open "USERS" to F.USERS else
    goto error
 end

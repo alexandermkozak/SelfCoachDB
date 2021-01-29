@@ -1,4 +1,4 @@
-subroutine MK.USER(userName, password, details = '', status, msg) VAR.ARGS
+subroutine MK.USER.B(userName, password, details = '', status, msg) VAR.ARGS
 open "USERS" to F.USERS else
    goto error
 end

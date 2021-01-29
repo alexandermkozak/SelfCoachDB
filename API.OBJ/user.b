@@ -1,4 +1,4 @@
-CLASS USER
+CLASS USER.B
    PRIVATE userName, firstName, lastName, password, emailAddress, groups, exists
    
    PUBLIC SUBROUTINE CREATE.OBJECT(newUserName)
