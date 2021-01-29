@@ -6,29 +6,9 @@ open "SYSCONFIGS" to F.SYSCONFIGS else
    goto error
 end
 status = @FALSE
-*** Old Version
-*userName = DOWNCASE(userName)
-*read user.rec from F.USERS, userName then
-*msg = "User Exists!"
-*end else
-*readv pepper from F.SYSCONFIGS, "pepper", 1 else gosub error
-*if ELEMENT.EXISTS(details{"firstName"}) then
-*user.rec<1> = details{'firstName'}
-*end
-*if ELEMENT.EXISTS(details{"lastName"}) then
-*user.rec<2> = details{'lastName'}
-*end
-*user.rec<3> = DIGEST(userName:password:pepper, @FALSE, "SHA512")
-*if ELEMENT.EXISTS(details{"emailAddress"}) then
-*user.rec<4> = details{"emailAddress"}
-*end
-*write user.rec on F.USERS, userName ON ERROR goto error
-*status = @TRUE
-*end
-***
-*** Proposed new version
-user = OBJECT("USER", userName)
-userName = user->GET.USERNAME()
+*
+user = OBJECT("USER.B", userName)
+userName = user->GET.USERNAME() ;* Reformat username to fit User object's formatting.
 if user->GET.EXISTS() then
    msg = "User Exists!"
 end else
