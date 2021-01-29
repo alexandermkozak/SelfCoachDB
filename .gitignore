@@ -1,3 +1,4 @@
-API.OBJ.OUT/*
-API.SYS.OUT/*
-REST.API.BP.OUT/*
+**/*.OUT
+**/*.DIC
+VOC/*
+stacks/*
