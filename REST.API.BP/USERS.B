@@ -74,7 +74,7 @@ userListPtr = 0
 USER.CNT = DCOUNT(USER.IDS,@AM)
 for USER.PTR = 1 TO USER.CNT
    user.id = USER.IDS<USER.PTR>
-   user = OBJECT("USER", user.id)
+   user = OBJECT("USER.B", user.id)
    if user->GET.EXISTS() then
       userListPtr += 1
       response<userListPtr> = user->TO.JSON()
@@ -85,7 +85,7 @@ response = "[":ereplace(response,@AM,","):"]"
 RETURN
 ***********
 handle.get:
-user = OBJECT("USER", userId)
+user = OBJECT("USER.B", userId)
 if user->GET.EXISTS() then
    response = user->TO.JSON()
    call WSETSTATUS(200)
@@ -100,7 +100,7 @@ handle.post:
 *
 request = JPARSE(requestBodyJSON)
 *
-user = OBJECT("USER", userId)
+user = OBJECT("USER.B", userId)
 if user->GET.EXISTS() then
    if ELEMENT.EXISTS(request{"firstName"}) then
       user->SET.FIRSTNAME(request{'firstName'})
@@ -131,7 +131,7 @@ RETURN
 ***********
 handle.delete:
 
-user = OBJECT("USER", userId)
+user = OBJECT("USER.B", userId)
 if user->GET.EXISTS() then
    user->DELETE.OBJECT(status)
    response{'status'} = "OK"

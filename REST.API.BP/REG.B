@@ -20,7 +20,7 @@ details = request{"userInfo"}
 logmsg "making user ":userName
 logmsg "password = ":request{"password"}
 logmsg "requestBodyJSON = ":requestBodyJSON
-call MK.USER(userName, password, details, status, message)
+call MK.USER.B(userName, password, details, status, message)
 if status then
   gosub success
 end else

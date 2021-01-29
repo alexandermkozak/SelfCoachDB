@@ -18,7 +18,7 @@ request = JPARSE(requestBodyJSON)
 userName = request{"userName"}
 password = request{"password"}
 
-call AUTH.USER(userName, password, result, userInfo)
+call AUTH.USER.B(userName, password, result, userInfo)
 if result then
   gosub success
 end else
