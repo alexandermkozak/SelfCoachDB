@@ -1,0 +1,18 @@
+{
+	
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"files.exclude": {
+			"**/$*" : true,
+			"**.*.OUT" :true,
+			"**.*.DIC" : true,
+			"**/cat" : true,
+			"**/stacks" : true,
+			"**/VOC" : true,
+		},
+	}
+}
