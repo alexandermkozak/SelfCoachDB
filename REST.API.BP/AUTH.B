@@ -18,7 +18,7 @@ request = JPARSE(requestBodyJSON)
 userName = request{"userName"}
 password = request{"password"}
 
-call AUTH.USER.B(userName, password, result, userInfo)
+call AUTH.USER.B(userName, password, result, userInfo, session, statusMessage)
 if result then
   gosub success
 end else
@@ -35,7 +35,8 @@ success:
 call WSETSTATUS(200)
 response{'status'} = "OK"
 response{'value'} = @TRUE
-response{'userInfo'} = userInfo
+response{'userInfo'} = userInfo->TO.COLLECTION();
+response{'sessionInfo'} = session->TO.COLLECTION();
 *
 goto send.response
 return
@@ -45,6 +46,7 @@ fail:
 call WSETSTATUS(200)
 response{'status'} = "OK"
 response{'value'} = @FALSE
+response{'statusMessage'} = statusMessage
 goto send.response
 return
 ***********
