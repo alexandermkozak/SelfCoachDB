@@ -57,7 +57,7 @@ CLASS USER.B
    
    PUBLIC FUNCTION TO.JSON()
       userInfo = Collection()
-      userInfo{"Name"} = userName
+      userInfo{"name"} = userName
       userInfo{"firstName"} = firstName
       userInfo{"lastName"} = lastName
       userInfo{"emailAddress"} = emailAddress
