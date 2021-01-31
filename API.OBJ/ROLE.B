@@ -43,8 +43,7 @@ CLASS ROLE.B
     END
 
     PUBLIC SUBROUTINE SET.NAME(newName) 
-      name = DOWNCASE(newName)
-      logmsg "Set role name to ":name
+      name = newName
       return
     END
    
