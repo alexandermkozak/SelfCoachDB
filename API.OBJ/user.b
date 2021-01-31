@@ -55,12 +55,17 @@ CLASS USER.B
       end
    END
    
-   PUBLIC FUNCTION TO.JSON()
+   PUBLIC FUNCTION TO.COLLECTION()
       userInfo = Collection()
       userInfo{"name"} = userName
       userInfo{"firstName"} = firstName
       userInfo{"lastName"} = lastName
       userInfo{"emailAddress"} = emailAddress
+      RETURN userInfo
+   END
+
+   PUBLIC FUNCTION TO.JSON()
+      userInfo = ME->TO.COLLECTION()
       RETURN JBUILD(userInfo)
    END
    
