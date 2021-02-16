@@ -115,7 +115,10 @@ if user->GET.EXISTS() then
    if ELEMENT.EXISTS(request{"emailAddress"}) then
       user->SET.EMAIL(request{"emailAddress"})
    end
-
+    if ELEMENT.EXISTS(request{"roles"}) then
+      logmsg \user has Roles\
+      user->SET.ROLES(request{"roles"})
+   end
    status = user->SAVE.OBJECT()
    response = user->TO.JSON()
    call WSETSTATUS(200)
