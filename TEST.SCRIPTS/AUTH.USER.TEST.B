@@ -8,4 +8,5 @@ if result then
 end else
    crt "Fail!"
 end
+* useless comment
 END
