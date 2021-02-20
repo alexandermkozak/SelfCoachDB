@@ -61,7 +61,9 @@ CLASS USER.B
       userInfo{"firstName"} = firstName
       userInfo{"lastName"} = lastName
       userInfo{"emailAddress"} = emailAddress
-      userInfo{"roles"} = roles
+      DIM staticRoles(dcount(roles,@AM))
+      MATPARSE staticRoles FROM roles, @AM
+      userInfo{"roles"} = MAT(staticRoles)
       RETURN userInfo
    END
 
