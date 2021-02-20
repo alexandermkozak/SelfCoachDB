@@ -101,21 +101,33 @@ handle.post:
 request = JPARSE(requestBodyJSON)
 *
 role = OBJECT("ROLE.B", roleId)
-if role->GET.EXISTS() then
-   if ELEMENT.EXISTS(request{"name"}) then
-      role->SET.NAME(request{'name'})
-   end
-   status = role->SAVE.OBJECT()
-   response = role->TO.JSON()
-   call WSETSTATUS(200)
-end else
-   if ELEMENT.EXISTS(request{"name"}) then
-      role->SET.NAME(request{'name'})
-   end
-   status = role->SAVE.OBJECT()
-   response = role->TO.JSON()
-   call WSETSTATUS(200)
+*if role->GET.EXISTS() then
+if ELEMENT.EXISTS(request{"name"}) then
+   role->SET.NAME(request{'name'})
 end
+if ELEMENT.EXISTS(request{"systemAdmin"}) then
+   role->SET.SYSTEM.ADMIN(request{'systemAdmin'})
+end
+if ELEMENT.EXISTS(request{"userAdmin"}) then
+   role->SET.USER.ADMIN(request{'userAdmin'})
+end
+status = role->SAVE.OBJECT()
+response = role->TO.JSON()
+call WSETSTATUS(200)
+*end else
+*   if ELEMENT.EXISTS(request{"name"}) then
+*      role->SET.NAME(request{'name'})
+*   end
+*   if ELEMENT.EXISTS(request{"systemAdmin"}) then
+*      role->SET.SYSTEM.ADMIN(request{'systemAdmin'})
+*   end
+*   if ELEMENT.EXISTS(request{"userAdmin"}) then
+*      role->SET.USER.ADMIN(request{'userAdmin'})
+*   end
+*   status = role->SAVE.OBJECT()
+*   response = role->TO.JSON()
+*   call WSETSTATUS(200)
+*end
 *
 
 *
