@@ -1,5 +1,5 @@
 CLASS USER.B
-   PRIVATE userName, firstName, lastName, password, emailAddress, groups, exists
+   PRIVATE userName, firstName, lastName, password, emailAddress, roles, exists
    
    PUBLIC SUBROUTINE CREATE.OBJECT(newUserName)
       userName = DOWNCASE(newUserName)
@@ -9,14 +9,14 @@ CLASS USER.B
          lastName = userRec<2>
          password = userRec<3>
          emailAddress = userRec<4>
-         groups = userRec<5>
+         roles = ereplace(userRec<5>,@VM,@AM)
          exists = @TRUE
       end else
          firstName = ''
          lastName = ''
          password = ''
          emailAddress = ''
-         groups = ''
+         roles = ''
          *
          exists = @FALSE
       end
@@ -33,7 +33,7 @@ CLASS USER.B
       userRec<2> = lastName
       userRec<3> = password
       userRec<4> = emailAddress
-      userRec<5> = groups
+      userRec<5> = ereplace(roles,@AM,@VM)
       ** Before writing, we should check "version" to be sure we aren't writing an older version on top of a newer version
       write userRec on F.USERS, userName ON ERROR
          status = @FALSE
@@ -61,6 +61,9 @@ CLASS USER.B
       userInfo{"firstName"} = firstName
       userInfo{"lastName"} = lastName
       userInfo{"emailAddress"} = emailAddress
+      DIM staticRoles(dcount(roles,@AM))
+      MATPARSE staticRoles FROM roles, @AM
+      userInfo{"roles"} = MAT(staticRoles)
       RETURN userInfo
    END
 
@@ -109,17 +112,29 @@ CLASS USER.B
       return emailAddress
    END
    
-   PUBLIC SUBROUTINE ADD.GROUP(newGroup) 
-      groups<-1> = newGroup
+   PUBLIC SUBROUTINE ADD.ROLE(newRole) 
+      roles<-1> = newRole
       return
    END
    
-   PUBLIC FUNCTION GET.GROUPS()
-      return groups
+   PUBLIC SUBROUTINE SET.ROLES(newRoles) 
+      
+      roles = ''
+      newRolesCount = INMAT(newRoles)
+      logmsg 'Setting user Roles with newRolesCount = ':newRolesCount
+      for rolePtr = 1 to newRolesCount
+         roles<rolePtr> = newRoles{rolePtr}
+      next rolePtr
+
+      return
+   END
+
+   PUBLIC FUNCTION GET.ROLES()
+      return roles
    END
    
-   PUBLIC SUBROUTINE CLEAR.GROUPS()
-      groups = ''
+   PUBLIC SUBROUTINE CLEAR.ROLES()
+      roles = ''
       return
    END
    
