@@ -27,11 +27,6 @@ END
 
 CALL WGETPARAM(roleId, 1)
 CALL WGETPARAM(queryType, 2)
-IF roleId = "" then
-   selectAllFlag = @TRUE
-end else
-   selectAllFlag = @FALSE
-end
 *
 call WGETBODY(requestBodyJSON)
 * I have no idea why I need to do this. Somewhere junk is being added to requests and this isn't dealing
@@ -58,10 +53,26 @@ RETURN
 ***********
 handle.get.list:
 *
+call WGETVAR(roleType, "type");
+
 query = \SSELECT ROLES\
 
-if not(selectAllFlag) then
-   query := \ with @ID = \:roleId
+if roleType # "" then
+   hasParams = 0
+   if roleType = "Admin" then
+      if hasParams then
+         query := " and"
+      end
+      query := " with isSystemAdmin"
+      hasParams = 1
+   end
+   if roleType = "UserAdmin" then
+      if hasParams then
+         query := " and"
+      end
+      query := " with isUsersAdmin"
+      hasParams = 1
+   end
 end
 
 LOGMSG query
