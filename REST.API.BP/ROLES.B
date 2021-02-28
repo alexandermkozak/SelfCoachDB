@@ -53,26 +53,31 @@ RETURN
 ***********
 handle.get.list:
 *
-call WGETVAR(roleType, "type");
+call WGETVAR(roleTypes, "type");
+roleTypes = ereplace(roleTypes,",",@AM)
+roleTypesCount = dcount(roleTypes,@AM)
 
 query = \SSELECT ROLES\
 
-if roleType # "" then
+if roleTypesCount > 0 then
    hasParams = 0
-   if roleType = "Admin" then
-      if hasParams then
-         query := " and"
+   for roleTypesPointer = 1 to roleTypesCount
+      roleType = roleTypes<roleTypesPointer>
+      if roleType = "Admin" then
+         if hasParams then
+            query := " or"
+         end
+         query := " with isSystemAdmin"
+         hasParams = 1
       end
-      query := " with isSystemAdmin"
-      hasParams = 1
-   end
-   if roleType = "UserAdmin" then
-      if hasParams then
-         query := " and"
+      if roleType = "UserAdmin" then
+         if hasParams then
+            query := " or"
+         end
+         query := " with isUsersAdmin"
+         hasParams = 1
       end
-      query := " with isUsersAdmin"
-      hasParams = 1
-   end
+   next roleTypesPointer
 end
 
 LOGMSG query
