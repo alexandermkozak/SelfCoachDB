@@ -38,7 +38,7 @@ call WGETBODY(requestBodyJSON)
 requestBodyJSON = requestBodyJSON[1,index(requestBodyJSON,"}",count(requestBodyJSON,"}"))]
 requestBodyJSON = requestBodyJSON[index(requestBodyJSON,"{",1),len(requestBodyJSON)]
 *
-logmsg REQUEST.METHOD:" USERS/":userId:" with ":requestBodyJSON:"|"
+*logmsg REQUEST.METHOD:" USERS/":userId:" with ":requestBodyJSON:"|"
 *
 begin case
    case userId # "" and REQUEST.METHOD = "DELETE"
@@ -64,7 +64,7 @@ if not(selectAllFlag) then
    query := \ with @ID = \:userId
 end
 
-LOGMSG query
+*LOGMSG query
 *
 EXECUTE query CAPTURING MESSAGE RTNLIST USER.IDS
 *
@@ -87,12 +87,41 @@ RETURN
 handle.get:
 user = OBJECT("USER.B", userId)
 if user->GET.EXISTS() then
-   response = user->TO.JSON()
-   call WSETSTATUS(200)
+   if queryType # "" then
+      Begin Case
+         case queryType = "GOALS"
+            gosub handle.get.goals
+      end case
+   end else
+      response = user->TO.JSON()
+      call WSETSTATUS(200)
+   end
+   
 end else
    response{'status'} = "ERROR"
    call WSETSTATUS(404)
 end
+
+RETURN
+***********
+handle.get.goals:
+stm = \SELECT GOALS WITH OWNER = "\:userId:\"\
+EXECUTE stm RTNLIST GOAL.IDS
+
+response = ""
+goalListPtr = 0
+*
+GOAL.CNT = DCOUNT(GOAL.IDS,@AM)
+for GOAL.PTR = 1 TO GOAL.CNT
+   goal.id = GOAL.IDS<GOAL.PTR>
+   goal = OBJECT("GOAL.B", goal.id)
+   if goal->GET.EXISTS() then
+      goalListPtr += 1
+      response<goalListPtr> = goal->TO.JSON()
+   end
+next GOAL.PTR
+response = "[":ereplace(response,@AM,","):"]"
+
 
 RETURN
 ***********
@@ -116,7 +145,6 @@ if user->GET.EXISTS() then
       user->SET.EMAIL(request{"emailAddress"})
    end
     if ELEMENT.EXISTS(request{"roles"}) then
-      logmsg \user has Roles\
       user->SET.ROLES(request{"roles"})
    end
    status = user->SAVE.OBJECT()
@@ -149,7 +177,7 @@ RETURN
 ***********
 
 error:
-LOGMSG "AUTH ERROR"
+*LOGMSG "AUTH ERROR"
 response{'status'} = "ERROR"
 response{'value'} = "false"
 call WSETSTATUS(500)
