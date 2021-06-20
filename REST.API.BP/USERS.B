@@ -19,7 +19,7 @@ CALL WGETHEADER(REQUEST.METHOD,"REQUEST_METHOD")
 *
 IF REQUEST.METHOD = "OPTIONS" THEN
    CALL WSETHEADER("Access-Control-Headers"        ,"Content-Type, Authentication"            )
-   CALL WSETHEADER("Access-Control-Allow-Headers"  ,"Content-Type, Authentication, Cookies"   )
+   CALL WSETHEADER("Access-Control-Allow-Headers"  ,"Content-Type, Authentication, Cookies, Access-Control-Allow-Origin"   )
    CALL WSETHEADER("Access-Control-Allow-Methods"  ,"GET,POST,DELETE"                         )
    CALL WSEND("")
    STOP
