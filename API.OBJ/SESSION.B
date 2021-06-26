@@ -1,6 +1,11 @@
 $include keys.h
+
+EQU LOGGED.IN.STATUS TO "VALID"
+EQU LOGGED.OUT.STATUS TO "OUT"
+EQU EXPIRED.STATUS TO "EXPIRED"
+
 CLASS SESSION.B
-    PRIVATE id, userId, createDate, createTime, exists
+    PRIVATE id, userId, createDate, createTime, exists, sessionStatus
     PUBLIC SUBROUTINE CREATE.OBJECT(newId)
         open 'SESSIONS' to F.SESSIONS else exists = @FALSE
         read sessionRec from F.SESSIONS, newId then
@@ -8,10 +13,12 @@ CLASS SESSION.B
             userId = sessionRec<1>
             createDate = sessionRec<2>
             createTime = sessionRec<3>
+            sessionStatus = sessionRec<4>
             exists = @TRUE
         end else
             id = SYSTEM(SYS$UUID)
             exists = @FALSE
+            sessionStatus = LOGGED.IN.STATUS
             createDate = DATE()
             createTime = TIME()
         end
@@ -27,6 +34,7 @@ CLASS SESSION.B
       sessionRec<1> = userId
       sessionRec<2> = createDate
       sessionRec<3> = createTime
+      sessionRec<4> = sessionStatus
       ** Before writing, we should check "version" to be sure we aren't writing an older version on top of a newer version
       write sessionRec on F.SESSIONS, id ON ERROR
          status = @FALSE
@@ -68,6 +76,20 @@ CLASS SESSION.B
       return id
     END
 
+    PUBLIC FUNCTION GET.STATUS()
+      return sessionStatus
+    END
+
+    PUBLIC FUNCTION LOGOUT.SESSION() 
+      sessionStatus = LOGGED.OUT.STATUS
+      return sessionStatus
+    END
+
+    PUBLIC FUNCTION EXPIRE.SESSION() 
+      sessionStatus = EXPIRED.STATUS
+      return sessionStatus
+    END
+
     PUBLIC FUNCTION TO.COLLECTION()
         sessionInfo = Collection()
         if exists then
@@ -75,6 +97,7 @@ CLASS SESSION.B
             sessionInfo{"userId"} = userId
             sessionInfo{"createDate"} = oconv(createDate,"D4/")
             sessionInfo{"createTime"} = oconv(createTime,"MTHS")
+            sessionInfo{"status"} = sessionStatus
         END
 
         return sessionInfo

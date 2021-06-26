@@ -44,7 +44,7 @@ begin case
    case sessionId # "" and REQUEST.METHOD = "DELETE"
     *  gosub handle.delete
    case REQUEST.METHOD = "POST"
-     * gosub handle.post
+      gosub handle.post
    case REQUEST.METHOD = "GET" and sessionId # ""
       gosub handle.get
    case REQUEST.METHOD = "GET" and sessionId = ""
@@ -56,31 +56,24 @@ send.response:
 call WSEND(response)
 RETURN
 ***********
-handle.get.list:
+handle.post:
 *
-query = \SSELECT SESSIONS\
-
-if not(selectAllFlag) then
-   query := \ with @ID = \:sessionId
-end
-
-LOGMSG query
+session = OBJECT("SESSION.B", sessionId)
 *
-EXECUTE query CAPTURING MESSAGE RTNLIST session.IDS
-*
-response = ""
-sessionListPtr = 0
-*
-session.CNT = DCOUNT(session.IDS,@AM)
-for session.PTR = 1 TO session.CNT
-   session.id = session.IDS<session.PTR>
-   session = OBJECT("SESSION.B", session.id)
+if queryType = "Logout" then
    if session->GET.EXISTS() then
-      sessionListPtr += 1
-      response<sessionListPtr> = session->TO.JSON()
+      ignore = session->LOGOUT.SESSION()
+      ignore = session->SAVE.OBJECT()
+      response = session->TO.JSON()
+      call WSETSTATUS(200)
+   end else
+      LOGMSG "Session doesn't exist!"
+      gosub error
    end
-next session.PTR
-response = "[":ereplace(response,@AM,","):"]"
+end else
+   LOGMSG "No valid endpoint!"
+   gosub error
+end
 *
 RETURN
 ***********
@@ -97,26 +90,13 @@ end
 RETURN
 
 ***********
-handle.delete:
-
-session = OBJECT("SESSION.B", sessionId)
-if session->GET.EXISTS() then
-   session->DELETE.OBJECT(status)
-   response{'status'} = "OK"
-   call WSETSTATUS(200)
-end else
-   response{'status'} = "ERROR"
-   call WSETSTATUS(404)
-end
-response = JBUILD(response)
-
-RETURN
-***********
 
 error:
-LOGMSG "AUTH ERROR"
-response{'status'} = "ERROR"
-response{'value'} = "false"
+LOGMSG "SESSION ERROR"
+responseObject = collection()
+responseObject{'status'} = "ERROR"
+responseObject{'value'} = "false"
+response = JBUILD(responseObject)
 call WSETSTATUS(500)
 goto send.response
 return
