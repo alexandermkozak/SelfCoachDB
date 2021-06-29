@@ -4,6 +4,27 @@ end
 open "SYSCONFIGS" to F.SYSCONFIGS else
    gosub error
 end
+
+CALL WSETCONTENTTYPE("application/json")
+*
+CALL WSETHEADER("Access-Control-Allow-Origin","*")
+*
+* Get our request_method
+*
+CALL WGETHEADER(REQUEST.METHOD,"REQUEST_METHOD")
+*
+* Special code for CORS.  If cors kicks and a OPTION request is sent by the browser the
+* following code will make this work.  This is a development only item.  For production
+* you want to read the CORS documents.
+*
+IF REQUEST.METHOD = "OPTIONS" THEN
+   CALL WSETHEADER("Access-Control-Headers"        ,"Content-Type, Authentication"            )
+   CALL WSETHEADER("Access-Control-Allow-Headers"  ,"Content-Type, Authentication, Cookies, Access-Control-Allow-Origin"   )
+   CALL WSETHEADER("Access-Control-Allow-Methods"  ,"GET,POST,DELETE"                         )
+   CALL WSEND("")
+   STOP
+END
+
 userName = ""
 password = ""
 response = COLLECTION()
