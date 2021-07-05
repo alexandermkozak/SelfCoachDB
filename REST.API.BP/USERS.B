@@ -12,6 +12,7 @@ CALL WSETHEADER("Access-Control-Allow-Origin","*")
 * Get our request_method
 *
 CALL WGETHEADER(REQUEST.METHOD,"REQUEST_METHOD")
+CALL WGETHEADER(REQUEST.AUTH.TOKEN,"HTTP_AUTHTOKEN")
 *
 * Special code for CORS.  If cors kicks and a OPTION request is sent by the browser the
 * following code will make this work.  This is a development only item.  For production
@@ -19,7 +20,7 @@ CALL WGETHEADER(REQUEST.METHOD,"REQUEST_METHOD")
 *
 IF REQUEST.METHOD = "OPTIONS" THEN
    CALL WSETHEADER("Access-Control-Headers"        ,"Content-Type, Authentication"            )
-   CALL WSETHEADER("Access-Control-Allow-Headers"  ,"Content-Type, Authentication, Cookies, Access-Control-Allow-Origin"   )
+   CALL WSETHEADER("Access-Control-Allow-Headers"  ,"Content-Type, Authentication, Cookies, Access-Control-Allow-Origin, AuthToken")
    CALL WSETHEADER("Access-Control-Allow-Methods"  ,"GET,POST,DELETE"                         )
    CALL WSEND("")
    STOP
@@ -39,6 +40,7 @@ requestBodyJSON = requestBodyJSON[1,index(requestBodyJSON,"}",count(requestBodyJ
 requestBodyJSON = requestBodyJSON[index(requestBodyJSON,"{",1),len(requestBodyJSON)]
 *
 *logmsg REQUEST.METHOD:" USERS/":userId:" with ":requestBodyJSON:"|"
+logmsg "USERS.B with authToken: ":REQUEST.AUTH.TOKEN
 *
 begin case
    case userId # "" and REQUEST.METHOD = "DELETE"
@@ -139,7 +141,7 @@ if user->GET.EXISTS() then
    end
    if ELEMENT.EXISTS(request{"password"}) then
       readv pepper from F.SYSCONFIGS, "pepper", 1 else gosub error
-      user->SET.PASSWORD(DIGEST(userName:password:pepper, @FALSE, "SHA512"))
+      user->SET.PASSWORD(DIGEST(userName:request{"password"}:pepper, @FALSE, "SHA512"))
    end
    if ELEMENT.EXISTS(request{"emailAddress"}) then
       user->SET.EMAIL(request{"emailAddress"})
