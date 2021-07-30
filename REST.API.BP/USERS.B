@@ -4,7 +4,7 @@ end
 open "SYSCONFIGS" to F.SYSCONFIGS else
    gosub error
 end
-* test!
+
 CALL WSETCONTENTTYPE("application/json")
 *
 CALL WSETHEADER("Access-Control-Allow-Origin","*")
