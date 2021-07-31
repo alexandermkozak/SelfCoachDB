@@ -21,7 +21,7 @@ CALL WGETHEADER(REQUEST.METHOD,"REQUEST_METHOD")
 *
 IF REQUEST.METHOD = "OPTIONS" THEN
    CALL WSETHEADER("Access-Control-Headers"        ,"Content-Type, Authentication"            )
-   CALL WSETHEADER("Access-Control-Allow-Headers"  ,"Content-Type, Authentication, Cookies, Access-Control-Allow-Origin"   )
+   CALL WSETHEADER("Access-Control-Allow-Headers"  ,"Content-Type, Authentication, Cookies, Access-Control-Allow-Origin, AuthToken")
    CALL WSETHEADER("Access-Control-Allow-Methods"  ,"GET,POST,DELETE"                         )
    CALL WSEND("")
    STOP
@@ -82,7 +82,10 @@ write eventRec on F.EVENTS, eventId ON ERROR
     logmsg "Failed to write ":eventId:"!"
 end
 *
-response = \{ "status": "ok!"}\
+responseObj = Collection()
+responseObj{"status"} = "ok!"
+responseObj{"id"} = eventId
+response = JBUILD(responseObj)
 *
 RETURN
 ***********
@@ -111,7 +114,7 @@ handle.get.list:
 CALL WGETVAR(queryDate,"date")
 
 query = \select EVENTS with userID = "\:userId:\"\
-query2 = \select EVENTS with startDate <= "\:queryDate:\" or with endDate >= "\:queryDate:\"\
+query2 = \select EVENTS with startDate <= "\:queryDate:\" and with endDate >= "\:queryDate:\"\
 
 execute query capturing resultDesc ;* index this query
 logmsg query:"|":resultDesc
@@ -139,6 +142,7 @@ if @SELECTED > 0 then
             result{"endDate"} = oconv(eventRec<4>, "d4/")
             result{"startTime"} = oconv(eventRec<5>, "mth")
             result{"endTime"} = oconv(eventRec<6>, "mth")
+            result{"id"} = eventId
             results(resultPointer) = result
         end
     repeat
@@ -146,8 +150,7 @@ if @SELECTED > 0 then
     response = JBUILD(MAT(results))
     call WSETSTATUS(200)
 end else
-
-
+    response = \{"status" : "None"}\
 end
 
 RETURN
