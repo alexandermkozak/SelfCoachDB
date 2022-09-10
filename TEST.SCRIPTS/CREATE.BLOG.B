@@ -4,9 +4,10 @@ open 'BLOG.METADATA' to f.metadata else null
 post.name = "my-second-blog-post"
 
 metadata.rec = ""
-metadata.rec<1> = date() ; * created date
-metadata.rec<2> = date() ; * last update date
-metadata.rec<3> = "kojaxinator" ; * by users
+metadata.rec<1> = "A test blog post!"
+metadata.rec<2> = date() ; * created date
+metadata.rec<3> = date() ; * last update date
+metadata.rec<4> = "kojaxinator" ; * by users
 
 blog.rec = ''
 blog.rec<1> = "# This is the title of my blog post!"
